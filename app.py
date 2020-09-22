@@ -11,15 +11,15 @@ import pickle
 from datetime import datetime, timedelta
 import os
 from os.path import join as oj
-
+from config import data_dir, viz_dir
 import nn
 
 ## find the closet pkl file to load
 def load_data():
-    cached_dir = "/home/ubuntu/new_uploader/data"
+#     data_dir = "/home/ubuntu/new_uploader/data"
     for i in range(10):
         d = (datetime.today() - timedelta(days=i)).date()
-        cached_fname = oj(cached_dir, f'preds_{d.month}_{d.day}_cached.pkl')
+        cached_fname = oj(data_dir, f'preds_{d.month}_{d.day}_cached.pkl')
         if os.path.exists(cached_fname):
             with open(cached_fname, 'rb') as f:
                 df = pickle.load(f)
@@ -124,7 +124,7 @@ def get_options(list_counties):
 
 def get_feats():
     dict_list = []
-    feats = {"# ICU Beds": "#ICU_beds", "Recent Daily Deaths": "#Deaths_07-03-2020", "Median Age": "MedianAge2010", "Total Deaths": "tot_deaths"}
+    feats = {"# ICU Beds": "#ICU_beds", "Recent Daily Deaths": "recent_deaths", "Median Age": "MedianAge2010", "Total Deaths": "tot_deaths"}
     for k, v in feats.items():
         dict_list.append({'label': k, 'value': v})
 
@@ -162,7 +162,8 @@ app.layout = html.Div(
 
 # Callback for timeseries price
 @app.callback(Output('timeseries', 'figure'),
-              [Input('countyselector', 'value'), Input('nnfeatselector', 'value')])
+              [Input('countyselector', 'value'),
+               Input('nnfeatselector', 'value')])
 def update_graph(selected_counties, selected_features):
     print(selected_counties)
     print(selected_features)
@@ -177,8 +178,7 @@ def update_graph(selected_counties, selected_features):
                         subplot_titles=("Cases", "Deaths", "Cases (Aligned to first case)", "Deaths (Aligned to first death)"))
     keys = ['cases', 'deaths', 'aligned_cases', 'aligned_deaths']
     import sys
-    sys.path.append("/home/ubuntu/new_uploader/viz")
-    #sys.path.append("/usr/local/google/home/danqingwang/covid19-severity-prediction/viz")
+    sys.path.append(viz_dir)
     import viz_map_utils
     date1 = viz_map_utils.date_in_data(df)
 #     print(date1)
