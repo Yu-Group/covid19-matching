@@ -7,9 +7,14 @@ import plotly.graph_objs as go
 
 def model(df, feats_list, county):
     print(county)
-    target = df[df['pos']==county][feats_list]
+    df_feats = df[feats_list + ['pos']].copy()
+    for feat in feats_list:
+        feat_mean = df_feats[feat].mean()
+        feat_std = df_feats[feat].std()
+        df_feats[feat] = (df_feats[feat] - feat_mean) / feat_std
+    target = df_feats[df_feats['pos']==county][feats_list]
     distances = []
-    for index, row in df[feats_list].iterrows():
+    for index, row in df_feats.iterrows():
         dist = 0
         for f in feats_list:
             dist += (float(target[f]) - float(row[f]))**2
